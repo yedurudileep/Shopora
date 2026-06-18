@@ -40,13 +40,14 @@ const OrderSuccessPage = () => {
         <h1
           style={{
             color: "#28a745",
-            fontSize: "clamp(28px, 8vw, 42px)",
-            marginBottom: "15px",
+            fontSize: "32px",
             lineHeight: "1.2",
-            wordBreak: "break-word",
+            marginBottom: "15px",
           }}
         >
-          Order Placed Successfully!
+          Order Placed
+          <br />
+          Successfully!
         </h1>
 
         <p

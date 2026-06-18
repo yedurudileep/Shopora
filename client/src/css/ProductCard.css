@@ -1,0 +1,116 @@
+.product-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.product-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 Aspect Ratio */
+  background: #f8f8f8;
+}
+
+.product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  /* border: 2px solid rgba(82, 82, 255, 0.745); */
+  border: 1px solid #a2a5a9;
+  border-bottom:none;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 174, 255, 0.097);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.1);
+}
+
+.product-info {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border: 1px solid #a2a5a9;
+
+}
+
+.product-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.product-title:hover {
+  color: var(--primary);
+}
+
+.product-rating {
+  font-size: 12px;
+  color: #fff;
+  background-color: var(--success);
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.product-rating .star {
+  font-size: 10px;
+}
+
+.product-price-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: auto; /* push button to bottom */
+}
+
+.price {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.original-price {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.discount {
+  font-size: 12px;
+  color: var(--success);
+  font-weight: 500;
+}

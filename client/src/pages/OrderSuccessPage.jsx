@@ -37,12 +37,13 @@ const OrderSuccessPage = () => {
         >
           🎉
         </div>
-
         <h1
           style={{
             color: "#28a745",
-            fontSize: "42px",
+            fontSize: "clamp(28px, 8vw, 42px)",
             marginBottom: "15px",
+            lineHeight: "1.2",
+            wordBreak: "break-word",
           }}
         >
           Order Placed Successfully!
@@ -93,9 +94,7 @@ const OrderSuccessPage = () => {
               letterSpacing: "1px",
             }}
           >
-            {orderId
-              ? `#${orderId.slice(-8).toUpperCase()}`
-              : "Not Available"}
+            {orderId ? `#${orderId.slice(-8).toUpperCase()}` : "Not Available"}
           </p>
         </div>
 

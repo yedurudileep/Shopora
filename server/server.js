@@ -3,9 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+
 const authRoutes = require('./routes/authRoutes');
 const orderRoutes = require('./routes/orderRoutes');
-
+const paymentRoute=require('./routes/paymentRoute')
 const app = express();
 
 // Middleware
@@ -15,6 +16,8 @@ app.use(cors());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
+app.use("/api/payment", paymentRoute);
+
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

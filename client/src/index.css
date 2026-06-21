@@ -177,7 +177,7 @@ button {
 .mb-2 { margin-bottom: 20px; }
 .mb-3 { margin-bottom: 30px; }
 .card {
-  background: var(--card-bg);
+  background: rgba(198, 211, 234, 0.536);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   padding: 20px;

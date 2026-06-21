@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
     (product.price * product.discountPercentage) / 100;
 
   const handleAddToCart = () => {
-    addToCart(product.id);
+    addToCart(product);
     toast.success("🛒 Added to Cart!", {
       position: "bottom-center",
       autoClose: 1500,

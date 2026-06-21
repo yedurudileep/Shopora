@@ -1,296 +1,470 @@
-import React, { useContext, useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+import {
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import "../css/CheckoutPage.css";
 
 const CheckoutPage = () => {
-  const { cartItems, clearCart } = useContext(CartContext);
-  const { token } = useContext(AuthContext);
+  const { cartItems, clearCart } =
+    useContext(CartContext);
+  const { token } =
+    useContext(AuthContext);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const buyNowItem = location.state?.buyNowItem;
+  const buyNowItem =
+    location.state?.buyNowItem;
 
-  // If Buy Now is clicked → only that item
-  // Otherwise → use cart items
-  const checkoutItems = buyNowItem ? [buyNowItem] : cartItems;
+  // Buy Now → one item
+  // Cart Checkout → all cart items
+  const checkoutItems = buyNowItem
+    ? [buyNowItem]
+    : cartItems;
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    country: "",
-  });
+  const [formData, setFormData] =
+    useState({
+      fullName: "",
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "",
+    });
 
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [totalAmount, setTotalAmount] =
+    useState(0);
+
+  const [
+    paymentCompleted,
+    setPaymentCompleted,
+  ] = useState(false);
 
   useEffect(() => {
-    if (checkoutItems.length === 0 && !paymentCompleted) {
+    if (
+      checkoutItems.length === 0 &&
+      !paymentCompleted
+    ) {
       navigate("/cart");
       return;
     }
 
-    const calculateTotal = async () => {
-      let total = 0;
+    const total =
+      checkoutItems.reduce(
+        (sum, item) =>
+          sum +
+          (item.price || 0) *
+            item.quantity,
+        0
+      );
 
-      for (const item of checkoutItems) {
-        try {
-          const res = await axios.get(
-            `https://dummyjson.com/products/${item.id}`,
-          );
+    setTotalAmount(total);
+  }, [
+    checkoutItems,
+    navigate,
+    paymentCompleted,
+  ]);
 
-          const product = res.data;
-
-          const discountPrice =
-            product.price - (product.price * product.discountPercentage) / 100;
-
-          total += discountPrice * item.quantity;
-        } catch (error) {
-          console.error("Error fetching product:", error);
-        }
-      }
-
-      setTotalAmount(total);
-    };
-
-    calculateTotal();
-  }, [checkoutItems, navigate, paymentCompleted]);
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
     });
   };
 
   const placeOrder = async (e) => {
     e.preventDefault();
 
-    if (checkoutItems.length === 0) {
+    if (
+      checkoutItems.length === 0
+    ) {
       alert("Your cart is empty");
       return;
     }
 
-    if (!totalAmount || totalAmount <= 0) {
-      alert("Invalid order amount");
+    if (
+      !totalAmount ||
+      totalAmount <= 0
+    ) {
+      alert(
+        "Invalid order amount"
+      );
       return;
     }
 
-    if (formData.fullName.trim().length < 3) {
-      alert("Please enter a valid full name");
+    if (
+      formData.fullName.trim()
+        .length < 3
+    ) {
+      alert(
+        "Please enter a valid full name"
+      );
       return;
     }
 
-    if (formData.address.trim().length < 5) {
-      alert("Please enter a valid address");
+    if (
+      formData.address.trim()
+        .length < 5
+    ) {
+      alert(
+        "Please enter a valid address"
+      );
       return;
     }
 
-    if (formData.city.trim().length < 2) {
-      alert("Please enter a valid city");
+    if (
+      formData.city.trim()
+        .length < 2
+    ) {
+      alert(
+        "Please enter a valid city"
+      );
       return;
     }
 
-    if (formData.postalCode.trim().length < 4) {
-      alert("Please enter a valid postal code");
+    if (
+      formData.postalCode.trim()
+        .length < 4
+    ) {
+      alert(
+        "Please enter a valid postal code"
+      );
       return;
     }
 
-    if (formData.country.trim().length < 2) {
-      alert("Please enter a valid country");
+    if (
+      formData.country.trim()
+        .length < 2
+    ) {
+      alert(
+        "Please enter a valid country"
+      );
       return;
     }
 
     try {
       const orderData = {
-        products: checkoutItems.map((item) => ({
-          productId: item.id,
-          title: item.title,
-          quantity: item.quantity,
-        })),
-        shippingAddress: formData,
-        totalAmount: Number(totalAmount.toFixed(2)),
+        products:
+          checkoutItems.map(
+            (item) => ({
+              productId:
+                item.id,
+              title:
+                item.title,
+              quantity:
+                item.quantity,
+            })
+          ),
+        shippingAddress:
+          formData,
+        totalAmount: Number(
+          totalAmount.toFixed(2)
+        ),
       };
 
       // Create Razorpay Order
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/payment/create-order`,
-        {
-          amount: Math.round(totalAmount),
-        },
-      );
+      const response =
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/payment/create-order`,
+          {
+            amount: Number(
+              totalAmount.toFixed(2)
+            ),
+          }
+        );
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: response.data.amount,
-        currency: response.data.currency,
-        order_id: response.data.orderId,
+        key: import.meta.env
+          .VITE_RAZORPAY_KEY_ID,
+
+        amount:
+          response.data.amount,
+
+        currency:
+          response.data.currency,
+
+        order_id:
+          response.data.orderId,
+
         name: "Shopora",
-        description: "Order Payment",
 
-        handler: async function (response) {
-          try {
-            console.log("PAYMENT SUCCESS");
-            console.log(response);
+        description:
+          "Order Payment",
 
-            const verifyResponse = await axios.post(
-              `${import.meta.env.VITE_API_URL}/payment/verify`,
-              {
-                ...response,
-                orderData,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
+        handler:
+          async function (
+            response
+          ) {
+            try {
+              const verifyResponse =
+                await axios.post(
+                  `${import.meta.env.VITE_API_URL}/payment/verify`,
+                  {
+                    ...response,
+                    orderData,
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
 
-            console.log(verifyResponse.data);
+              if (
+                verifyResponse
+                  .data.success
+              ) {
+                setPaymentCompleted(
+                  true
+                );
 
-            if (verifyResponse.data.success) {
-              setPaymentCompleted(true);
+                if (
+                  !buyNowItem
+                ) {
+                  clearCart();
+                }
 
-              if (!buyNowItem) {
-                clearCart();
+                navigate(
+                  "/order-success",
+                  {
+                    state: {
+                      orderId:
+                        verifyResponse
+                          .data
+                          .order._id,
+                    },
+                  }
+                );
               }
+            } catch (error) {
+              console.error(
+                "Verification Error:",
+                error
+              );
 
-              navigate("/order-success", {
-                state: {
-                  orderId: verifyResponse.data.order._id,
-                },
-              });
+              alert(
+                error.response
+                  ?.data
+                  ?.message ||
+                  "Payment verification failed"
+              );
             }
-          } catch (error) {
-            console.error("Verification Error:", error);
-
-            alert(
-              error.response?.data?.message || "Payment verification failed",
-            );
-          }
-        },
+          },
 
         modal: {
-          ondismiss: function () {
-            alert("Payment cancelled.");
-          },
+          ondismiss:
+            function () {
+              alert(
+                "Payment cancelled."
+              );
+            },
         },
 
         prefill: {
-          name: formData.fullName,
+          name:
+            formData.fullName,
         },
 
         theme: {
-          color: "#3399cc",
+          color:
+            "#3399cc",
         },
       };
 
-      const razorpay = new window.Razorpay(options);
+      if (
+        !window.Razorpay
+      ) {
+        alert(
+          "Razorpay SDK failed to load."
+        );
+        return;
+      }
+
+      const razorpay =
+        new window.Razorpay(
+          options
+        );
+
       razorpay.open();
     } catch (error) {
       console.error(error);
 
       alert(
         "Failed to place order. " +
-          (error.response?.data?.message || error.message),
+          (error.response
+            ?.data
+            ?.message ||
+            error.message)
       );
     }
   };
+
   return (
     <div className="checkout-container">
       {/* Shipping Form */}
       <div className="card checkout-form-section">
-        <h2>Shipping Address</h2>
+        <h2>
+          Shipping Address
+        </h2>
 
-        {/* <form onSubmit={placeOrder}> */}
-        <form>
-          {" "}
+        <form
+          onSubmit={
+            placeOrder
+          }
+        >
           <div className="form-group">
-            <label>Full Name</label>
+            <label>
+              Full Name
+            </label>
+
             <input
               type="text"
               className="form-control"
               name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
+              value={
+                formData.fullName
+              }
+              onChange={
+                handleChange
+              }
               required
             />
           </div>
+
           <div className="form-group">
-            <label>Address</label>
+            <label>
+              Address
+            </label>
+
             <input
               type="text"
               className="form-control"
               name="address"
-              value={formData.address}
-              onChange={handleChange}
+              value={
+                formData.address
+              }
+              onChange={
+                handleChange
+              }
               required
             />
           </div>
+
           <div className="form-group">
-            <label>City</label>
+            <label>
+              City
+            </label>
+
             <input
               type="text"
               className="form-control"
               name="city"
-              value={formData.city}
-              onChange={handleChange}
+              value={
+                formData.city
+              }
+              onChange={
+                handleChange
+              }
               required
             />
           </div>
+
           <div className="form-group">
-            <label>Postal Code</label>
+            <label>
+              Postal Code
+            </label>
+
             <input
               type="text"
               className="form-control"
               name="postalCode"
-              value={formData.postalCode}
-              onChange={handleChange}
+              value={
+                formData.postalCode
+              }
+              onChange={
+                handleChange
+              }
               required
             />
           </div>
+
           <div className="form-group">
-            <label>Country</label>
+            <label>
+              Country
+            </label>
+
             <input
               type="text"
               className="form-control"
               name="country"
-              value={formData.country}
-              onChange={handleChange}
+              value={
+                formData.country
+              }
+              onChange={
+                handleChange
+              }
               required
             />
           </div>
+
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary btn-block mt-2"
-            onClick={placeOrder}
           >
-            Place Order - ${Number(totalAmount || 0).toFixed(2)}
+            Place Order - $
+            {Number(
+              totalAmount || 0
+            ).toFixed(2)}
           </button>
         </form>
       </div>
 
       {/* Order Summary */}
       <div className="card checkout-summary">
-        <h2>Order Summary</h2>
+        <h2>
+          Order Summary
+        </h2>
 
         <p>
-          You have <strong>{checkoutItems.length}</strong> item(s) in this
+          You have{" "}
+          <strong>
+            {
+              checkoutItems.length
+            }
+          </strong>{" "}
+          item(s) in this
           order.
         </p>
 
         <div className="summary-total mt-2">
-          <h3>Total to Pay: ${Number(totalAmount || 0).toFixed(2)}</h3>
+          <h3>
+            Total to Pay: $
+            {Number(
+              totalAmount || 0
+            ).toFixed(2)}
+          </h3>
         </div>
 
         <div className="payment-method mt-2">
-          <h4>Payment Method</h4>
-          <p style={{ color: "var(--text-muted)" }}>
-            Cash on Delivery (Default)
+          <h4>
+            Payment Method
+          </h4>
+
+          <p
+            style={{
+              color:
+                "var(--text-muted)",
+            }}
+          >
+            Razorpay
           </p>
         </div>
       </div>

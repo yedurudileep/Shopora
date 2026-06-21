@@ -1,26 +1,44 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const protect = async (req, res, next) => {
-  let token;
-  
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // We don't fetch full user object from DB for every protected route to save DB calls, 
-      // but we append the decoded userId to req.user.
-      req.user = {_id: decoded.id };
-      
-      next();
-    } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-  }
+  try {
+    let token;
 
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    // Check if Authorization header exists
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    // If token is not present
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, no token",
+      });
+    }
+
+    // Verify JWT token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    // Attach user id to request
+    req.user = {
+      _id: decoded.id,
+    };
+
+    next();
+  } catch (error) {
+    console.error("JWT Error:", error);
+
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized, token failed",
+    });
   }
 };
 

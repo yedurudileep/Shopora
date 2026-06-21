@@ -39,19 +39,11 @@ const verifyPayment = async (req, res) => {
     } = req.body;
 
     const generatedSignature = crypto
-      .createHmac(
-        "sha256",
-        process.env.RAZORPAY_KEY_SECRET
-      )
-      .update(
-        `${razorpay_order_id}|${razorpay_payment_id}`
-      )
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    if (
-      generatedSignature !==
-      razorpay_signature
-    ) {
+    if (generatedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Payment Verification Failed",
@@ -61,10 +53,8 @@ const verifyPayment = async (req, res) => {
     const order = new Order({
       user: req.user._id,
       products: orderData.products,
-      shippingAddress:
-        orderData.shippingAddress,
-      totalAmount:
-        orderData.totalAmount,
+      shippingAddress: orderData.shippingAddress,
+      totalAmount: orderData.totalAmount,
       status: "Paid",
     });
 
@@ -76,15 +66,12 @@ const verifyPayment = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error(
-      "Payment Verification Error:",
-      error
-    );
+    console.error("Payment Verification Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message:
-        "Payment verification failed",
+      message: error.message,
+      stack: error.stack,
     });
   }
 };
